@@ -1,0 +1,2772 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ford Feature Intelligence</title>
+  <style>
+    :root {
+      --ford: #0b3d91;
+      --blue: #1f6feb;
+      --cyan: #2bb8ff;
+      --green: #31c48d;
+      --lime: #b8e955;
+      --amber: #f3aa35;
+      --purple: #7c5cff;
+      --red: #ef6864;
+      --ink: #0a1733;
+      --muted: #5a6880;
+      --line: #dce5f1;
+      --soft: #f5f8fc;
+      --card: #ffffff;
+      --night: #061422;
+      --night-2: #0b2035;
+      --shadow: 0 18px 55px rgba(14, 33, 68, 0.1);
+      --home-car-image: url("assets/ford-explorer-home.png");
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 16% 0%, rgba(31, 111, 235, 0.1), transparent 32%),
+        radial-gradient(circle at 92% 12%, rgba(49, 196, 141, 0.11), transparent 28%),
+        #f7f9fc;
+    }
+
+    button {
+      font: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .svg-defs {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .icon.small {
+      width: 15px;
+      height: 15px;
+    }
+
+    .icon.flip {
+      transform: rotate(180deg);
+    }
+
+    .page {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 26px;
+      align-items: end;
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      color: var(--ford);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 740px;
+      margin: 0;
+      color: #071a3d;
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 650px;
+      margin: 18px 0 0;
+      color: #31405a;
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    .hero-card {
+      display: grid;
+      gap: 10px;
+      min-width: 260px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #071a3d;
+      color: white;
+    }
+
+    .hero-card b {
+      font-size: 14px;
+    }
+
+    .hero-card span {
+      color: #bcd0e8;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .section {
+      margin-top: 18px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      color: var(--ford);
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      max-width: 760px;
+      margin: 7px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #eef5ff;
+      color: var(--ford);
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .pill::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(49, 196, 141, 0.15);
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .icon-btn {
+      border: 0;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .primary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 16px;
+      color: white;
+      background: linear-gradient(135deg, #1f6feb, #0b3d91);
+      box-shadow: 0 10px 22px rgba(31, 111, 235, 0.22);
+    }
+
+    .ghost-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 14px;
+      color: #17335f;
+      border: 1px solid #cbd9eb;
+      background: white;
+    }
+
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      color: #17335f;
+      border: 1px solid #cbd9eb;
+      background: white;
+    }
+
+    .round-icon {
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      color: white;
+    }
+
+    .blue { background: linear-gradient(135deg, #1f6feb, #0b3d91); }
+    .green { background: linear-gradient(135deg, #42d99b, #1d9f72); }
+    .purple { background: linear-gradient(135deg, #8c71ff, #5a45de); }
+    .cyan { background: linear-gradient(135deg, #44c2ff, #167ce3); }
+    .amber { background: linear-gradient(135deg, #ffc45d, #f29a22); }
+    .red { background: linear-gradient(135deg, #ff8a87, #e85351); }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .principle {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: center;
+      min-height: 86px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+    }
+
+    .principle b {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ford);
+    }
+
+    .principle span:last-child {
+      color: #475871;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .mobile-layout {
+      display: grid;
+      grid-template-columns: 340px minmax(0, 1fr);
+      gap: 24px;
+      align-items: center;
+    }
+
+    .phone {
+      width: min(100%, 330px);
+      margin: 0 auto;
+      padding: 9px;
+      border-radius: 34px;
+      background: #03070c;
+      box-shadow: 0 24px 54px rgba(5, 17, 35, 0.28);
+    }
+
+    .phone-screen {
+      height: 650px;
+      overflow: hidden;
+      position: relative;
+      border-radius: 26px;
+      color: white;
+      border: 1px solid #183756;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(31, 111, 235, 0.34), transparent 34%),
+        linear-gradient(180deg, #071b2e, #06111f 70%, #050b14);
+    }
+
+    .phone-status,
+    .car-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px 6px;
+      color: #e8f1fb;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .phone-content {
+      padding: 18px 18px 82px;
+      height: calc(100% - 36px);
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .phone-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .phone-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .phone-title h3 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .score-zone {
+      display: grid;
+      justify-items: center;
+      gap: 13px;
+      padding: 18px 0 22px;
+      text-align: center;
+    }
+
+    .score-ring {
+      display: grid;
+      place-items: center;
+      position: relative;
+      width: 142px;
+      height: 142px;
+      border-radius: 50%;
+      background: conic-gradient(var(--green) 0 210deg, var(--lime) 210deg 262deg, rgba(255,255,255,0.12) 262deg);
+    }
+
+    .score-ring::after {
+      content: "";
+      position: absolute;
+      inset: 13px;
+      border-radius: 50%;
+      background: #071426;
+      box-shadow: inset 0 0 0 1px #163252;
+    }
+
+    .score-ring strong {
+      position: relative;
+      z-index: 1;
+      font-size: 46px;
+      letter-spacing: 0;
+      line-height: 0.92;
+    }
+
+    .score-ring small {
+      display: block;
+      color: #a7b7ca;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .phone-card,
+    .night-card {
+      border: 1px solid #173653;
+      border-radius: 10px;
+      background: rgba(21, 49, 79, 0.84);
+    }
+
+    .phone-card {
+      padding: 14px;
+    }
+
+    .app-layer {
+      display: grid;
+      gap: 13px;
+    }
+
+    .app-layer.hidden {
+      display: none;
+    }
+
+    .layer-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .layer-heading h3 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .layer-heading small {
+      display: block;
+      margin-top: 4px;
+      color: #9fb0c4;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .mini-feature {
+      display: grid;
+      grid-template-columns: 38px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      min-height: 66px;
+      padding: 10px;
+      border: 1px solid #173653;
+      border-radius: 10px;
+      background: rgba(21, 49, 79, 0.84);
+      color: white;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .mini-feature.active {
+      border-color: #68c8ff;
+      box-shadow: 0 0 0 2px rgba(43, 184, 255, 0.16);
+    }
+
+    .mini-feature b,
+    .insight-item b,
+    .profile-row b {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
+
+    .mini-feature small,
+    .insight-item span,
+    .profile-row span {
+      color: #b8c9da;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .status-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .status-chip {
+      padding: 6px 8px;
+      border: 1px solid #275071;
+      border-radius: 999px;
+      background: rgba(43, 184, 255, 0.1);
+      color: #cfeaff;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .insight-map {
+      height: 118px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #173653;
+      border-radius: 10px;
+      background:
+        linear-gradient(35deg, transparent 45%, rgba(255,255,255,0.08) 46%, transparent 48%),
+        linear-gradient(125deg, transparent 44%, rgba(255,255,255,0.08) 45%, transparent 47%),
+        #10253b;
+    }
+
+    .insight-map::after {
+      content: "";
+      position: absolute;
+      left: 24px;
+      top: 62px;
+      width: 150px;
+      height: 50px;
+      border: 4px solid transparent;
+      border-top-color: #1f6feb;
+      border-right-color: #2bb8ff;
+      border-radius: 50%;
+      transform: rotate(-18deg);
+    }
+
+    .insight-item,
+    .profile-row {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 10px;
+      align-items: center;
+      min-height: 58px;
+      padding: 10px;
+      border: 1px solid #173653;
+      border-radius: 10px;
+      background: rgba(21, 49, 79, 0.84);
+    }
+
+    .profile-hero {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+      padding: 18px 12px;
+      border: 1px solid #173653;
+      border-radius: 12px;
+      background: rgba(21, 49, 79, 0.84);
+      text-align: center;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      color: white;
+      background: linear-gradient(135deg, #1f6feb, #31c48d);
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .profile-hero h3 {
+      margin: 0;
+      font-size: 21px;
+    }
+
+    .profile-hero p {
+      margin: 0;
+      color: #b8c9da;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+      color: #dce8f5;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 13px;
+    }
+
+    .metric:last-child { border-bottom: 0; }
+    .metric b { font-size: 20px; }
+
+    .phone-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      padding: 9px 12px 16px;
+      border-top: 1px solid #172c44;
+      background: rgba(5, 12, 22, 0.94);
+    }
+
+    .phone-nav button {
+      display: grid;
+      justify-items: center;
+      gap: 4px;
+      min-height: 44px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: #8ea0b5;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .phone-nav button.active {
+      color: var(--cyan);
+      background: rgba(43, 184, 255, 0.12);
+    }
+
+    .mobile-side {
+      display: grid;
+      gap: 14px;
+    }
+
+    .recommendation-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .feature-row {
+      display: grid;
+      grid-template-columns: 46px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      width: 100%;
+      min-height: 78px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+      color: #13244d;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: 0 8px 22px rgba(14, 33, 68, 0.04);
+    }
+
+    .feature-row.active {
+      border-color: #7bb8ff;
+      box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12);
+    }
+
+    .feature-row b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .feature-row span:last-child,
+    .feature-row small {
+      color: #5a6880;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fbff;
+    }
+
+    .summary-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .summary-card b {
+      display: block;
+      margin-top: 5px;
+      font-size: 22px;
+    }
+
+    .infotainment-layout {
+      display: grid;
+      gap: 18px;
+    }
+
+    .car-frame {
+      padding: 10px;
+      border-radius: 20px;
+      background: #03070c;
+      box-shadow: 0 28px 65px rgba(4, 12, 24, 0.28);
+    }
+
+    .car-screen {
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr);
+      min-height: 520px;
+      overflow: hidden;
+      border: 1px solid #193855;
+      border-radius: 14px;
+      color: white;
+      background:
+        radial-gradient(circle at 78% 0%, rgba(43, 184, 255, 0.24), transparent 32%),
+        linear-gradient(160deg, #071a2b, #04101d 75%);
+    }
+
+    .rail {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      padding: 14px 9px;
+      border-right: 1px solid #17334f;
+      background: rgba(5, 14, 25, 0.76);
+    }
+
+    .rail button {
+      display: grid;
+      justify-items: center;
+      gap: 5px;
+      min-height: 58px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: #93a8bd;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .rail button.active {
+      color: var(--cyan);
+      background: rgba(43, 184, 255, 0.12);
+    }
+
+    .dash {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-width: 0;
+    }
+
+    .dash-layer {
+      display: block;
+    }
+
+    .dash-layer.hidden {
+      display: none;
+    }
+
+    .dash-page {
+      display: grid;
+      gap: 16px;
+      padding: 18px;
+      min-height: 423px;
+    }
+
+    .dash-page.two-col {
+      grid-template-columns: minmax(360px, 1fr) minmax(280px, 0.72fr);
+    }
+
+    .sync-home-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.68fr 0.7fr 0.7fr;
+      grid-template-rows: 132px 132px 132px;
+      gap: 8px;
+      padding: 14px;
+      min-height: 423px;
+      background:
+        radial-gradient(circle at 20% 12%, rgba(255,255,255,0.06), transparent 24%),
+        linear-gradient(145deg, #101315, #07090b 76%);
+    }
+
+    .sync-tile {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+      min-width: 0;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      background: linear-gradient(145deg, #2b2e31, #191c1f);
+      color: #f2f5f7;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 22px rgba(0,0,0,0.18);
+      padding: 18px;
+      text-align: left;
+    }
+
+    .sync-tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.95;
+    }
+
+    .sync-tile > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .sync-tile.nav-bg::before {
+      background:
+        radial-gradient(circle at 50% 22%, rgba(91, 139, 255, 0.34), transparent 26%),
+        linear-gradient(145deg, rgba(51, 83, 154, 0.48), rgba(18, 22, 29, 0.16));
+    }
+
+    .sync-tile.clock-bg::before {
+      background:
+        radial-gradient(circle at 60% 42%, rgba(255,255,255,0.12), transparent 34%),
+        linear-gradient(145deg, rgba(255,255,255,0.08), rgba(7,10,14,0.16));
+    }
+
+    .sync-tile.weather-bg::before {
+      background:
+        radial-gradient(circle at 35% 28%, rgba(255, 213, 112, 0.38), transparent 20%),
+        radial-gradient(circle at 64% 62%, rgba(117, 203, 255, 0.24), transparent 30%),
+        linear-gradient(145deg, rgba(55, 80, 92, 0.42), transparent);
+    }
+
+    .sync-tile.messages-bg::before {
+      background:
+        radial-gradient(circle at 50% 30%, rgba(255,255,255,0.14), transparent 26%),
+        linear-gradient(145deg, rgba(92, 103, 120, 0.38), rgba(17, 20, 24, 0.08));
+    }
+
+    .sync-tile.coach-bg::before {
+      background:
+        radial-gradient(circle at 92% 28%, rgba(255, 126, 38, 0.22), transparent 22%),
+        linear-gradient(135deg, rgba(242, 159, 47, 0.18), rgba(40, 48, 60, 0.12));
+    }
+
+    .sync-tile.music-bg::before {
+      background:
+        radial-gradient(circle at 50% 32%, rgba(43, 184, 255, 0.22), transparent 26%),
+        linear-gradient(145deg, rgba(44, 86, 125, 0.4), rgba(17, 20, 24, 0.12));
+    }
+
+    .sync-tile.drive-bg::before {
+      background:
+        radial-gradient(circle at 50% 35%, rgba(49, 196, 141, 0.22), transparent 25%),
+        linear-gradient(145deg, rgba(51, 92, 73, 0.38), rgba(17, 20, 24, 0.12));
+    }
+
+    .sync-tile.equalizer-bg::before {
+      background:
+        radial-gradient(circle at 50% 55%, rgba(124, 92, 255, 0.24), transparent 28%),
+        linear-gradient(145deg, rgba(60, 48, 108, 0.38), rgba(17, 20, 24, 0.12));
+    }
+
+    button.sync-tile {
+      cursor: pointer;
+      font: inherit;
+    }
+
+    button.sync-tile:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: linear-gradient(145deg, #33373a, #1e2226);
+    }
+
+    .sync-tile.large {
+      grid-column: span 2;
+    }
+
+    .sync-tile.tall {
+      grid-row: span 2;
+    }
+
+    .sync-tile.media {
+      grid-column: span 2;
+    }
+
+    .sync-tile.center {
+      justify-items: center;
+      text-align: center;
+    }
+
+    .sync-tile h3,
+    .sync-tile b {
+      margin: 0;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .sync-tile h3 {
+      font-size: 15px;
+      color: #cdd3d8;
+      text-transform: uppercase;
+    }
+
+    .sync-tile .value {
+      color: white;
+      font-size: 44px;
+      font-weight: 300;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .sync-tile .subtle {
+      color: #a7adb4;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .sync-car {
+      position: absolute;
+      left: 7%;
+      right: 8%;
+      bottom: 20px;
+      height: 72px;
+    }
+
+    .sync-car::before {
+      content: "";
+      position: absolute;
+      left: 8%;
+      right: 5%;
+      bottom: 14px;
+      height: 38px;
+      border-radius: 44px 54px 18px 16px;
+      background: linear-gradient(180deg, #d8dde2, #777f87);
+      box-shadow: 0 16px 24px rgba(0,0,0,0.34);
+    }
+
+    .sync-car::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 4px;
+      height: 24px;
+      background:
+        radial-gradient(circle at 20% 50%, #111 0 15px, #555 16px 19px, transparent 20px),
+        radial-gradient(circle at 76% 50%, #111 0 15px, #555 16px 19px, transparent 20px);
+    }
+
+    .sync-car-photo {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.18) 46%, rgba(0,0,0,0.08) 100%),
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.18)),
+        var(--home-car-image),
+        linear-gradient(145deg, #2b2e31, #191c1f);
+      background-size: cover;
+      background-position: center 58%;
+      opacity: 0.94;
+    }
+
+    .sync-car-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 58%;
+      opacity: 0.94;
+    }
+
+    .sync-car-photo::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 48%;
+      background: linear-gradient(0deg, rgba(0,0,0,0.46), transparent);
+    }
+
+    .car-caption {
+      position: relative;
+      z-index: 1;
+      color: #cdd3d8;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .tile-icon {
+      color: #f5f7f9;
+      width: 34px;
+      height: 34px;
+    }
+
+    .destination-flag {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      color: white;
+    }
+
+    .media-art {
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.05), transparent),
+        linear-gradient(135deg, #f47b20 0 45%, #c64128 45% 68%, #f5d7a1 68%);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+    }
+
+    .media-layout {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .media-controls {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-top: 10px;
+      color: #dbe1e6;
+    }
+
+    .equalizer {
+      display: flex;
+      align-items: end;
+      justify-content: center;
+      gap: 5px;
+      height: 54px;
+    }
+
+    .equalizer span {
+      width: 5px;
+      border-radius: 999px;
+      background: #e7ecef;
+    }
+
+    .equalizer span:nth-child(1) { height: 18px; }
+    .equalizer span:nth-child(2) { height: 34px; }
+    .equalizer span:nth-child(3) { height: 48px; }
+    .equalizer span:nth-child(4) { height: 28px; }
+    .equalizer span:nth-child(5) { height: 40px; }
+
+    .sync-hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 18px;
+      border: 1px solid #173653;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 82% 18%, rgba(49, 196, 141, 0.18), transparent 30%),
+        rgba(20, 48, 78, 0.82);
+    }
+
+    .sync-hero h3 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      letter-spacing: 0;
+    }
+
+    .sync-hero p {
+      margin: 0;
+      color: #c7d8e9;
+      line-height: 1.45;
+    }
+
+    .vehicle-visual {
+      position: relative;
+      overflow: hidden;
+      width: 250px;
+      height: 130px;
+      border-radius: 14px;
+      background:
+        linear-gradient(180deg, transparent 47%, rgba(255,255,255,0.08) 48%, transparent 51%),
+        radial-gradient(ellipse at center, rgba(43,184,255,0.2), transparent 68%);
+    }
+
+    .vehicle-visual img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 58%;
+      opacity: 0.88;
+    }
+
+    .vehicle-body {
+      position: absolute;
+      left: 15%;
+      right: 12%;
+      top: 48%;
+      height: 42px;
+      border-radius: 28px 34px 14px 14px;
+      background: linear-gradient(180deg, #5d7890, #21364a);
+      box-shadow: 0 14px 28px rgba(0,0,0,0.26);
+    }
+
+    .vehicle-body::before {
+      content: "";
+      position: absolute;
+      left: 26%;
+      top: -24px;
+      width: 44%;
+      height: 28px;
+      border-radius: 22px 22px 4px 4px;
+      background: #466076;
+    }
+
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .dash-tile,
+    .app-tile,
+    .setting-row {
+      border: 1px solid #173653;
+      border-radius: 12px;
+      background: rgba(20, 48, 78, 0.82);
+      color: white;
+    }
+
+    .dash-tile,
+    .app-tile {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      min-height: 118px;
+      padding: 15px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .dash-tile.active,
+    .app-tile.active {
+      border-color: #63c7ff;
+      background: linear-gradient(160deg, rgba(28, 81, 128, 0.86), rgba(20, 48, 78, 0.78));
+      box-shadow: 0 0 0 3px rgba(43, 184, 255, 0.1);
+    }
+
+    .dash-tile:hover,
+    .app-tile:hover {
+      transform: translateY(-1px);
+      border-color: rgba(99, 199, 255, 0.72);
+    }
+
+    .dash-tile b,
+    .app-tile b,
+    .setting-row b {
+      display: block;
+      font-size: 15px;
+    }
+
+    .dash-tile span,
+    .app-tile span,
+    .setting-row span {
+      color: #c7d8e9;
+      font-size: 13px;
+      line-height: 1.38;
+    }
+
+    .vehicle-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .vehicle-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .vehicle-tab {
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid #244865;
+      border-radius: 999px;
+      background: rgba(20, 48, 78, 0.68);
+      color: #c7d8e9;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .vehicle-tab.active {
+      color: white;
+      background: #1f6feb;
+      border-color: #63c7ff;
+    }
+
+    .vehicle-panel-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .vehicle-info-card {
+      min-height: 92px;
+      padding: 13px;
+      border: 1px solid #173653;
+      border-radius: 12px;
+      background: rgba(20, 48, 78, 0.82);
+      color: white;
+    }
+
+    .vehicle-info-card b {
+      display: block;
+      margin: 7px 0 4px;
+      font-size: 17px;
+    }
+
+    .vehicle-info-card span {
+      color: #c7d8e9;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .vehicle-stat {
+      padding: 14px;
+      border: 1px solid #173653;
+      border-radius: 12px;
+      background: rgba(20, 48, 78, 0.82);
+    }
+
+    .vehicle-stat span {
+      display: block;
+      color: #aebfd0;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .vehicle-stat b {
+      display: block;
+      margin-top: 5px;
+      font-size: 24px;
+    }
+
+    .connect-card {
+      display: grid;
+      grid-template-columns: 46px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid #173653;
+      border-radius: 12px;
+      background: rgba(20, 48, 78, 0.82);
+    }
+
+    .connect-card b {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .connect-card span {
+      color: #c7d8e9;
+      font-size: 13px;
+    }
+
+    .switch-pill {
+      min-width: 54px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(49, 196, 141, 0.18);
+      color: #9df1cd;
+      font-size: 12px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .settings-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .navigation-page {
+      display: grid;
+      grid-template-columns: minmax(210px, 0.78fr) minmax(420px, 1.22fr);
+      grid-template-rows: 250px 116px;
+      gap: 10px;
+      padding: 18px;
+      min-height: 423px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 80% 8%, rgba(124,92,255,0.16), transparent 28%),
+        linear-gradient(145deg, #101315, #07090b 76%);
+    }
+
+    .nav-card-button {
+      display: block;
+      min-width: 0;
+      overflow: auto;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      background: #070b12;
+      box-shadow: 0 16px 34px rgba(0,0,0,0.26);
+      cursor: pointer;
+      padding: 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(99,199,255,0.55) rgba(255,255,255,0.08);
+      overscroll-behavior: contain;
+    }
+
+    .nav-card-button::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+
+    .nav-card-button::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+    }
+
+    .nav-card-button::-webkit-scrollbar-thumb {
+      background: rgba(99,199,255,0.55);
+      border-radius: 999px;
+    }
+
+    .nav-card-button:hover,
+    .nav-card-button:focus-visible {
+      outline: 0;
+      border-color: rgba(99, 199, 255, 0.72);
+      box-shadow: 0 0 0 3px rgba(43,184,255,0.14), 0 16px 34px rgba(0,0,0,0.26);
+    }
+
+    .nav-card-button img {
+      display: block;
+      width: 112%;
+      max-width: none;
+      min-height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .nav-speed-card {
+      grid-row: 1 / span 2;
+      min-height: 0;
+    }
+
+    .nav-speed-card img {
+      width: 100%;
+      min-height: 112%;
+    }
+
+    .nav-side-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: 250px 116px;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .nav-lower-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.02fr;
+      gap: 10px;
+    }
+
+    .nav-calendar-card {
+      min-height: 0;
+    }
+
+    .nav-calendar-card img {
+      width: 140%;
+      min-height: 100%;
+    }
+
+    .nav-mini-card img {
+      width: 118%;
+      min-height: 106%;
+    }
+
+    .nav-map-card img {
+      width: 116%;
+      min-height: 104%;
+    }
+
+    @media (max-width: 760px) {
+      .navigation-page {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+      }
+    }
+
+    .setting-row {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 68px;
+      padding: 12px;
+    }
+
+    .car-status {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .dash-main {
+      display: grid;
+      grid-template-columns: minmax(360px, 1fr) minmax(280px, 0.72fr);
+      gap: 16px;
+      padding: 18px;
+    }
+
+    .map-view {
+      min-height: 360px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #173653;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 50% 22%, rgba(49, 196, 141, 0.18), transparent 24%),
+        radial-gradient(circle at 50% 76%, rgba(43, 184, 255, 0.16), transparent 36%),
+        linear-gradient(180deg, #102943, #081827 72%);
+    }
+
+    .road {
+      position: absolute;
+      left: 50%;
+      top: 8%;
+      bottom: 0;
+      width: min(64%, 430px);
+      transform: translateX(-50%);
+      background:
+        linear-gradient(105deg, transparent 0 25%, rgba(130, 210, 255, 0.52) 25.5% 26.5%, transparent 27%),
+        linear-gradient(75deg, transparent 0 25%, rgba(130, 210, 255, 0.52) 25.5% 26.5%, transparent 27%),
+        linear-gradient(90deg, transparent 0 47%, rgba(255,255,255,0.09) 47.5% 52.5%, transparent 53%);
+      clip-path: polygon(38% 0, 62% 0, 96% 100%, 4% 100%);
+      opacity: 0.95;
+    }
+
+    .route {
+      position: absolute;
+      left: 50%;
+      top: 32%;
+      width: 88px;
+      height: 138px;
+      transform: translateX(-50%);
+      border-radius: 30px 30px 16px 16px;
+      background:
+        linear-gradient(180deg, rgba(112, 178, 224, 0.94), rgba(18, 61, 96, 0.98));
+      border: 1px solid rgba(160, 222, 255, 0.72);
+      box-shadow: 0 24px 46px rgba(0,0,0,0.32), 0 0 30px rgba(43, 184, 255, 0.24);
+      filter: none;
+    }
+
+    .route::before {
+      content: "";
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      top: 14px;
+      height: 36px;
+      border-radius: 18px 18px 6px 6px;
+      background: rgba(6, 20, 34, 0.62);
+    }
+
+    .route::after {
+      content: "";
+      position: absolute;
+      left: 13px;
+      right: 13px;
+      bottom: 12px;
+      height: 7px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ff7b72 0 34%, transparent 34% 66%, #ff7b72 66%);
+    }
+
+    .drive-card {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      display: grid;
+      grid-template-columns: 62px 1fr auto;
+      gap: 13px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 12px;
+      background: rgba(5, 13, 24, 0.78);
+      backdrop-filter: blur(12px);
+    }
+
+    .turn {
+      display: grid;
+      place-items: center;
+      height: 56px;
+      border-radius: 10px;
+      background: rgba(43, 184, 255, 0.14);
+      color: #78d4ff;
+      border: 1px solid rgba(120, 212, 255, 0.28);
+    }
+
+    .drive-card h3 {
+      margin: 0 0 3px;
+      font-size: 21px;
+      letter-spacing: 0;
+    }
+
+    .drive-card p {
+      margin: 0;
+      color: #b9c9db;
+      font-size: 13px;
+    }
+
+    .dash-stack {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .dash-card {
+      padding: 15px;
+      border: 1px solid #173653;
+      border-radius: 10px;
+      background: rgba(20, 48, 78, 0.68);
+    }
+
+    .dash-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 10px;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .dash-card p {
+      margin: 0;
+      color: #c7d8e9;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .coach-banner {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 13px;
+      border-radius: 10px;
+      background: rgba(31, 111, 235, 0.2);
+      border: 1px solid rgba(83, 194, 255, 0.32);
+    }
+
+    .climate {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      min-height: 48px;
+      padding: 0 18px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      background: #050b14;
+      color: #d6e5f3;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .climate span {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .coach-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.68fr) minmax(420px, 1fr);
+      gap: 18px;
+    }
+
+    .journey-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .journey-step {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      min-height: 64px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+      color: #13244d;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .journey-step.active {
+      border-color: #8dbfff;
+      background: #f2f7ff;
+      box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12);
+    }
+
+    .journey-step.complete {
+      border-color: rgba(49, 196, 141, 0.42);
+      background: #f3fbf7;
+    }
+
+    .journey-step.complete .num {
+      background: var(--green);
+    }
+
+    .num {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .journey-step b {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
+
+    .journey-step small {
+      color: #5a6880;
+      line-height: 1.3;
+    }
+
+    .coach-stage {
+      display: grid;
+      gap: 14px;
+      min-height: 100%;
+      padding: 18px;
+      border-radius: 14px;
+      color: white;
+      background:
+        radial-gradient(circle at 86% 10%, rgba(49, 196, 141, 0.2), transparent 28%),
+        radial-gradient(circle at 10% 10%, rgba(43, 184, 255, 0.22), transparent 30%),
+        linear-gradient(160deg, #061422, #0b2035);
+      box-shadow: inset 0 0 0 1px #173653;
+    }
+
+    .stage-top {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .stage-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid #224a70;
+      border-radius: 12px;
+      background: rgba(19, 45, 73, 0.72);
+    }
+
+    .stage-count {
+      display: grid;
+      gap: 7px;
+      min-width: min(320px, 100%);
+      color: #c9d9e9;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .stage-progress {
+      width: 100%;
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.13);
+    }
+
+    .stage-progress span {
+      display: block;
+      width: 12.5%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      transition: width 220ms ease;
+    }
+
+    .stage-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .stage-buttons button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .stage-top h3 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .stage-top p {
+      margin: 0;
+      color: #c5d7e9;
+      line-height: 1.42;
+    }
+
+    .stage-body {
+      display: grid;
+      grid-template-columns: minmax(240px, 0.9fr) minmax(260px, 1fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .coach-card {
+      padding: 16px;
+      border: 1px solid #224a70;
+      border-radius: 12px;
+      background: rgba(19, 45, 73, 0.84);
+    }
+
+    .coach-card h4 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .coach-card p {
+      margin: 0;
+      color: #c9d9e9;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .choice-grid {
+      display: grid;
+      gap: 9px;
+      margin-top: 13px;
+    }
+
+    .choice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      border: 1px solid #2b567d;
+      border-radius: 9px;
+      background: #102943;
+      color: white;
+      cursor: pointer;
+      padding: 0 12px;
+      font-weight: 900;
+    }
+
+    .choice.active {
+      background: #126d4b;
+      border-color: #31c48d;
+    }
+
+    .progress-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .progress-row {
+      display: grid;
+      gap: 7px;
+    }
+
+    .progress-row b {
+      font-size: 13px;
+    }
+
+    .bar {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.13);
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: 45%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      transition: width 220ms ease;
+    }
+
+    .flow-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .flow-chip {
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f9fbfe;
+    }
+
+    .flow-chip b {
+      color: #13244d;
+      font-size: 13px;
+    }
+
+    .flow-chip span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .benefit {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: center;
+      min-height: 82px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+    }
+
+    .benefit b {
+      display: block;
+      color: #13244d;
+      font-size: 14px;
+    }
+
+    .benefit span:last-child {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 30;
+      transform: translate(-50%, 16px);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: #061422;
+      color: white;
+      box-shadow: 0 18px 42px rgba(6, 20, 34, 0.28);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .section-head,
+      .mobile-layout,
+      .dash-main,
+      .coach-layout,
+      .stage-body {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card {
+        min-width: 0;
+      }
+
+      .principles,
+      .summary-cards,
+      .benefits,
+      .flow-summary {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .car-screen {
+        grid-template-columns: 64px minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page {
+        padding: 12px;
+      }
+
+      .hero,
+      .section {
+        padding: 18px;
+      }
+
+      .principles,
+      .summary-cards,
+      .benefits,
+      .flow-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .car-screen {
+        grid-template-columns: 1fr;
+      }
+
+      .rail {
+        grid-template-columns: repeat(6, 1fr);
+        grid-auto-flow: column;
+        border-right: 0;
+        border-bottom: 1px solid #17334f;
+      }
+
+      .rail button {
+        min-height: 50px;
+      }
+
+      .drive-card {
+        grid-template-columns: 52px 1fr;
+      }
+
+      .drive-card .eta {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true">
+    <symbol id="icon-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
+    <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
+    <symbol id="icon-chart" viewBox="0 0 24 24"><path d="M5 20V10"/><path d="M12 20V4"/><path d="M19 20v-7"/></symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.8-4 4.5-6 8-6s6.2 2 8 6"/></symbol>
+    <symbol id="icon-car" viewBox="0 0 24 24"><path d="M5 12 7 7h10l2 5"/><path d="M4 12h16v6H4z"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/></symbol>
+    <symbol id="icon-wifi" viewBox="0 0 24 24"><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19h.01"/></symbol>
+    <symbol id="icon-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1-2 3.4-.2-.1a1.7 1.7 0 0 0-1.8.1 8 8 0 0 1-1.6.7 1.7 1.7 0 0 0-1.2 1.5v.2H9v-.2A1.7 1.7 0 0 0 7.8 21a8 8 0 0 1-1.6-.7 1.7 1.7 0 0 0-1.8-.1l-.2.1-2-3.4.1-.1A1.7 1.7 0 0 0 2.6 15a8.5 8.5 0 0 1 0-2 1.7 1.7 0 0 0-.3-1.8l-.1-.1 2-3.4.2.1a1.7 1.7 0 0 0 1.8-.1A8 8 0 0 1 7.8 7 1.7 1.7 0 0 0 9 5.5v-.2h4v.2A1.7 1.7 0 0 0 14.2 7a8 8 0 0 1 1.6.7 1.7 1.7 0 0 0 1.8.1l.2-.1 2 3.4-.1.1a1.7 1.7 0 0 0-.3 1.8 8.5 8.5 0 0 1 0 2Z"/></symbol>
+    <symbol id="icon-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></symbol>
+    <symbol id="icon-spark" viewBox="0 0 24 24"><path d="M12 2v6"/><path d="M12 16v6"/><path d="M2 12h6"/><path d="M16 12h6"/><path d="m5 5 4 4"/><path d="m15 15 4 4"/><path d="m19 5-4 4"/><path d="m9 15-4 4"/></symbol>
+    <symbol id="icon-message" viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4V5Z"/><path d="M8 9h8"/><path d="M8 13h5"/></symbol>
+    <symbol id="icon-navigation" viewBox="0 0 24 24"><path d="M12 3 20 21l-8-4-8 4 8-18Z"/></symbol>
+    <symbol id="icon-map-pin" viewBox="0 0 24 24"><path d="M12 21s7-5.3 7-12a7 7 0 0 0-14 0c0 6.7 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></symbol>
+    <symbol id="icon-cruise" viewBox="0 0 24 24"><path d="M5 17a8 8 0 1 1 14 0"/><path d="M12 12 16 8"/><path d="M8 17h8"/></symbol>
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="icon-thumbs-up" viewBox="0 0 24 24"><path d="M7 10v10H4V10h3Z"/><path d="M7 10 12 3l1 1v5h6a2 2 0 0 1 2 2l-2 7a3 3 0 0 1-3 2H7"/></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></symbol>
+    <symbol id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7-11-7Z"/></symbol>
+    <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></symbol>
+    <symbol id="icon-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></symbol>
+  </svg>
+
+  <main class="page">
+    <section class="hero">
+      <div>
+        <span class="eyebrow"><svg class="icon small"><use href="#icon-spark"></use></svg> FordPass + SYNC concept</span>
+        <h1>Ford Feature Intelligence</h1>
+        <p>A calmer interface for discovering underused vehicle features, practicing them safely, and syncing feedback between the Ford app and in-car infotainment.</p>
+        <div class="hero-actions">
+          <a class="primary-btn" href="#mobile"><svg class="icon"><use href="#icon-home"></use></svg>View mobile app</a>
+          <a class="ghost-btn" href="#coach"><svg class="icon"><use href="#icon-message"></use></svg>Explore Coach flow</a>
+        </div>
+      </div>
+      <aside class="hero-card">
+        <b>Current focus</b>
+        <span id="heroFeature">Lane Keeping Assist selected</span>
+        <span>Mobile first, then infotainment, then Ford Coach journey.</span>
+      </aside>
+    </section>
+
+    <div class="principles">
+      <div class="principle"><span class="round-icon blue"><svg class="icon"><use href="#icon-compass"></use></svg></span><span><b>Discover</b>Show what the car can do without overwhelming the driver.</span></div>
+      <div class="principle"><span class="round-icon purple"><svg class="icon"><use href="#icon-spark"></use></svg></span><span><b>Improve</b>Recommend features from trip context and driving habits.</span></div>
+      <div class="principle"><span class="round-icon green"><svg class="icon"><use href="#icon-message"></use></svg></span><span><b>Feedback</b>Learn from driver preference after each real experience.</span></div>
+    </div>
+
+    <section class="section" id="mobile">
+      <div class="section-head">
+        <div>
+          <h2>1. Mobile App</h2>
+          <p>One focused Ford Coach home screen, supported by recommendations and recent-drive insight cards. The driver can choose a feature, learn basics, or schedule practice for the next drive.</p>
+        </div>
+        <span class="pill" id="mobileStatus">72 utilization score</span>
+      </div>
+
+      <div class="mobile-layout">
+        <article class="phone" aria-label="FordPass mobile mockup">
+          <div class="phone-screen">
+            <div class="phone-status"><span>9:41</span><span>LTE 89%</span></div>
+            <div class="phone-content">
+              <div class="app-layer" data-layer="Home">
+                <div class="phone-title">
+                  <h3>Hi, Gerald</h3>
+                  <button class="icon-btn" type="button" title="Notifications"><svg class="icon"><use href="#icon-bell"></use></svg></button>
+                </div>
+                <div class="score-zone">
+                  <div class="score-ring"><strong id="mobileScore">72<small>/100</small></strong></div>
+                  <p><b>Great progress.</b><br>You are using more features than 72% of similar drivers.</p>
+                </div>
+                <div class="phone-card">
+                  <div class="metric"><span>Features available</span><b>48</b></div>
+                  <div class="metric"><span>Actively used</span><b>12</b></div>
+                  <div class="metric"><span>Occasionally used</span><b>6</b></div>
+                  <div class="metric"><span>Never used</span><b>30</b></div>
+                </div>
+              </div>
+
+              <div class="app-layer hidden" data-layer="Features">
+                <div class="layer-heading">
+                  <div>
+                    <h3>Features</h3>
+                    <small>Available on Gerald's Ford Explorer</small>
+                  </div>
+                  <span class="status-chip">48 total</span>
+                </div>
+                <div class="status-chip-row">
+                  <span class="status-chip">12 active</span>
+                  <span class="status-chip">6 occasional</span>
+                  <span class="status-chip">30 unexplored</span>
+                </div>
+                <button class="mini-feature active" type="button" data-feature="Lane Keeping Assist">
+                  <span class="round-icon purple"><svg class="icon"><use href="#icon-navigation"></use></svg></span>
+                  <span><b>Lane Keeping Assist</b><small>Not tried | Best on highway drives</small></span>
+                  <svg class="icon small"><use href="#icon-chevron"></use></svg>
+                </button>
+                <button class="mini-feature" type="button" data-feature="Active Park Assist">
+                  <span class="round-icon cyan"><svg class="icon"><use href="#icon-map-pin"></use></svg></span>
+                  <span><b>Active Park Assist</b><small>Occasional | Useful in city parking</small></span>
+                  <svg class="icon small"><use href="#icon-chevron"></use></svg>
+                </button>
+                <button class="mini-feature" type="button" data-feature="Adaptive Cruise Control">
+                  <span class="round-icon amber"><svg class="icon"><use href="#icon-cruise"></use></svg></span>
+                  <span><b>Adaptive Cruise Control</b><small>Not tried | Suggested for motorways</small></span>
+                  <svg class="icon small"><use href="#icon-chevron"></use></svg>
+                </button>
+                <div class="phone-card">
+                  <div class="metric"><span>Selected feature</span><b id="phoneSelectedFeature">Lane Keeping</b></div>
+                </div>
+              </div>
+
+              <div class="app-layer hidden" data-layer="Insights">
+                <div class="layer-heading">
+                  <div>
+                    <h3>Recent Trip</h3>
+                    <small>Today | 8:32 AM | Gerald Muller</small>
+                  </div>
+                  <span class="status-chip">3 tips</span>
+                </div>
+                <div class="insight-map"></div>
+                <div class="summary-cards" style="grid-template-columns: repeat(3, 1fr);">
+                  <div class="summary-card" style="background: rgba(21,49,79,0.84); border-color:#173653;"><span style="color:#b8c9da;">Distance</span><b style="color:white;">32 km</b></div>
+                  <div class="summary-card" style="background: rgba(21,49,79,0.84); border-color:#173653;"><span style="color:#b8c9da;">Duration</span><b style="color:white;">45 min</b></div>
+                  <div class="summary-card" style="background: rgba(21,49,79,0.84); border-color:#173653;"><span style="color:#b8c9da;">Efficiency</span><b style="color:white;">18.2</b></div>
+                </div>
+                <div class="insight-item">
+                  <span class="round-icon purple"><svg class="icon"><use href="#icon-navigation"></use></svg></span>
+                  <span><b>Lane movement detected</b><span>Gerald made 120 steering corrections where Lane Keeping could help.</span></span>
+                </div>
+                <div class="insight-item">
+                  <span class="round-icon amber"><svg class="icon"><use href="#icon-cruise"></use></svg></span>
+                  <span><b>Highway opportunity</b><span>18 minutes of steady traffic were suitable for Adaptive Cruise.</span></span>
+                </div>
+                <div class="insight-item">
+                  <span class="round-icon green"><svg class="icon"><use href="#icon-check"></use></svg></span>
+                  <span><b>Coach suggestion</b><span>Practice one feature next drive when workload is low.</span></span>
+                </div>
+              </div>
+
+              <div class="app-layer hidden" data-layer="Profile">
+                <div class="profile-hero">
+                  <div class="avatar">GM</div>
+                  <h3>Gerald Muller</h3>
+                  <p>Primary driver | Ford Explorer<br>Coach profile synced to SYNC</p>
+                </div>
+                <div class="profile-row">
+                  <span class="round-icon blue"><svg class="icon"><use href="#icon-car"></use></svg></span>
+                  <span><b>Vehicle</b><span>2026 Ford Explorer | Activated</span></span>
+                </div>
+                <div class="profile-row">
+                  <span class="round-icon green"><svg class="icon"><use href="#icon-message"></use></svg></span>
+                  <span><b>Coaching intensity</b><span>Standard guidance | App + SYNC voice</span></span>
+                </div>
+                <div class="profile-row">
+                  <span class="round-icon purple"><svg class="icon"><use href="#icon-spark"></use></svg></span>
+                  <span><b>Comfort with tech</b><span>Curious, willing to try</span></span>
+                </div>
+                <div class="profile-row">
+                  <span class="round-icon cyan"><svg class="icon"><use href="#icon-chart"></use></svg></span>
+                  <span><b>Progress</b><span>12 features active | Next: Intelligent Speed Assist</span></span>
+                </div>
+              </div>
+            </div>
+            <nav class="phone-nav" aria-label="Phone navigation">
+              <button class="active" type="button" data-phone-tab="Home"><svg class="icon"><use href="#icon-home"></use></svg><span>Home</span></button>
+              <button type="button" data-phone-tab="Features"><svg class="icon"><use href="#icon-grid"></use></svg><span>Features</span></button>
+              <button type="button" data-phone-tab="Insights"><svg class="icon"><use href="#icon-chart"></use></svg><span>Insights</span></button>
+              <button type="button" data-phone-tab="Profile"><svg class="icon"><use href="#icon-user"></use></svg><span>Profile</span></button>
+            </nav>
+          </div>
+        </article>
+
+        <div class="mobile-side">
+          <div class="recommendation-grid">
+            <button class="feature-row active" type="button" data-feature="Lane Keeping Assist">
+              <span class="round-icon purple"><svg class="icon"><use href="#icon-navigation"></use></svg></span>
+              <span><b>Lane Keeping Assist</b><small>Could have reduced steering corrections by about 120 times.</small></span>
+              <svg class="icon small"><use href="#icon-chevron"></use></svg>
+            </button>
+            <button class="feature-row" type="button" data-feature="Active Park Assist">
+              <span class="round-icon cyan"><svg class="icon"><use href="#icon-map-pin"></use></svg></span>
+              <span><b>Active Park Assist</b><small>You spent 18 minutes parking this week.</small></span>
+              <svg class="icon small"><use href="#icon-chevron"></use></svg>
+            </button>
+            <button class="feature-row" type="button" data-feature="Adaptive Cruise Control">
+              <span class="round-icon amber"><svg class="icon"><use href="#icon-cruise"></use></svg></span>
+              <span><b>Adaptive Cruise Control</b><small>Could reduce fatigue on long highway drives.</small></span>
+              <svg class="icon small"><use href="#icon-chevron"></use></svg>
+            </button>
+          </div>
+
+          <div class="summary-cards">
+            <div class="summary-card"><span>Distance</span><b>32 km</b></div>
+            <div class="summary-card"><span>Duration</span><b>45 min</b></div>
+            <div class="summary-card"><span>Opportunities</span><b>3</b></div>
+          </div>
+
+          <div class="summary-card">
+            <span>Recommended action</span>
+            <b id="mobileAction">Practice Lane Keeping next drive</b>
+            <p style="margin: 8px 0 0; color: var(--muted); line-height: 1.45;">A practice flag syncs to SYNC and allows the car to offer a tutorial only when the context is safe.</p>
+            <div class="hero-actions">
+              <button class="primary-btn" type="button" id="practiceButton"><svg class="icon"><use href="#icon-check"></use></svg>Practice next drive</button>
+              <button class="ghost-btn" type="button" id="learnButton"><svg class="icon"><use href="#icon-play"></use></svg>Learn basics</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="infotainment">
+      <div class="section-head">
+        <div>
+          <h2>2. Infotainment Display</h2>
+          <p>The in-car surface stays lighter than the mobile app. It shows the right suggestion at the right time, offers a voice-first tutorial, and keeps driving workload low.</p>
+        </div>
+        <span class="pill" id="carStatus">Phone profile connected</span>
+      </div>
+
+      <div class="infotainment-layout">
+        <div class="car-frame">
+          <div class="car-screen">
+            <nav class="rail" aria-label="Car infotainment navigation">
+              <button class="active" type="button" data-car-tab="Home"><svg class="icon"><use href="#icon-home"></use></svg><span>Home</span></button>
+              <button type="button" data-car-tab="Navigation"><svg class="icon"><use href="#icon-navigation"></use></svg><span>Nav</span></button>
+              <button type="button" data-car-tab="Vehicle"><svg class="icon"><use href="#icon-car"></use></svg><span>Vehicle</span></button>
+              <button type="button" data-car-tab="Connect"><svg class="icon"><use href="#icon-wifi"></use></svg><span>Connect</span></button>
+              <button type="button" data-car-tab="Apps"><svg class="icon"><use href="#icon-grid"></use></svg><span>Apps</span></button>
+              <button type="button" data-car-tab="Settings"><svg class="icon"><use href="#icon-settings"></use></svg><span>Settings</span></button>
+            </nav>
+            <div class="dash">
+              <div class="car-status"><span>10:30</span><span id="dashContext">Coach ready | 22 C</span></div>
+              <div class="dash-layer" data-car-layer="Home">
+                <div class="sync-home-grid">
+                  <button class="sync-tile large" type="button" data-car-tab-shortcut="Vehicle">
+                    <img class="sync-car-img" src="assets/ford-explorer-home.png" alt="">
+                    <div class="sync-car-photo" aria-hidden="true"></div>
+                  </button>
+                  <button class="sync-tile center nav-bg" type="button" data-car-tab-shortcut="Navigation">
+                    <span class="destination-flag"><svg class="icon tile-icon"><use href="#icon-navigation"></use></svg></span>
+                    <h3 id="dashTitle">Navigation</h3>
+                    <span class="subtle" id="dashCopy">Route, ETA, and traffic</span>
+                  </button>
+                  <button class="sync-tile center clock-bg" type="button">
+                    <span class="value">17:58</span>
+                  </button>
+                  <button class="sync-tile center weather-bg" type="button">
+                    <svg class="icon tile-icon"><use href="#icon-spark"></use></svg>
+                    <span class="value" style="font-size: 38px;">13°</span>
+                  </button>
+                  <button class="sync-tile center messages-bg" type="button" data-car-tab-shortcut="Connect">
+                    <svg class="icon tile-icon"><use href="#icon-message"></use></svg>
+                    <span class="value" style="font-size: 38px;">2</span>
+                    <span class="subtle">new messages</span>
+                  </button>
+                  <button class="sync-tile media coach-bg" type="button" id="startTutorial">
+                    <div class="media-layout">
+                      <div>
+                        <h3 style="color:#f0a32f;">Ford Coach</h3>
+                        <b id="voiceLine">How can I assist?</b>
+                        <span class="subtle" id="tutorialCopy"></span>
+                        <div class="media-controls">
+                          <svg class="icon small"><use href="#icon-chevron"></use></svg>
+                          <svg class="icon small"><use href="#icon-play"></use></svg>
+                          <svg class="icon small"><use href="#icon-check"></use></svg>
+                          <svg class="icon small"><use href="#icon-mic"></use></svg>
+                        </div>
+                      </div>
+                      <div class="media-art" aria-hidden="true"></div>
+                    </div>
+                  </button>
+                  <button class="sync-tile center music-bg" type="button" data-car-tab-shortcut="Apps">
+                    <b style="font-size: 20px;">Music</b>
+                  </button>
+                  <button class="sync-tile center drive-bg" type="button">
+                    <b style="font-size: 16px;">Driving<br>mode</b>
+                  </button>
+                  <button class="sync-tile center equalizer-bg" type="button" data-car-tab-shortcut="Apps">
+                    <div class="equalizer"><span></span><span></span><span></span><span></span><span></span></div>
+                  </button>
+                </div>
+              </div>
+
+              <div class="dash-layer hidden" data-car-layer="Navigation">
+                <div class="navigation-page">
+                  <button class="nav-card-button nav-speed-card" type="button" data-car-tab-shortcut="Vehicle" aria-label="Open vehicle layer">
+                    <img src="assets/nav-speed-card.png" alt="Speed and vehicle status">
+                  </button>
+                  <div class="nav-side-grid">
+                    <button class="nav-card-button nav-map-card" type="button" data-car-tab-shortcut="Navigation" aria-label="Open navigation map">
+                      <img src="assets/nav-map-card.png" alt="Navigation map">
+                    </button>
+                    <div class="nav-lower-grid">
+                      <button class="nav-card-button nav-mini-card" type="button" data-car-tab-shortcut="Apps" aria-label="Open apps layer">
+                        <img src="assets/nav-music-card.png" alt="Music card">
+                      </button>
+                      <button class="nav-card-button nav-mini-card" type="button" data-car-tab-shortcut="Connect" aria-label="Open connect layer">
+                        <img src="assets/nav-phone-card.png" alt="Phone connection card">
+                      </button>
+                      <button class="nav-card-button nav-calendar-card" type="button" aria-label="Open calendar card">
+                        <img src="assets/nav-calendar-card.png" alt="Calendar card">
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dash-layer hidden" data-car-layer="Vehicle">
+                <div class="dash-page">
+                  <div class="sync-hero">
+                    <div>
+                      <h3>Gerald's Ford Explorer</h3>
+                      <p>Range, health, controls, driver assist, and service at a glance.</p>
+                    </div>
+                    <div class="vehicle-visual"><img src="assets/ford-explorer-home.png" alt=""></div>
+                  </div>
+                  <div class="vehicle-tabs" aria-label="Vehicle categories">
+                    <button class="vehicle-tab active" type="button" data-vehicle-tab="Overview">Overview</button>
+                    <button class="vehicle-tab" type="button" data-vehicle-tab="Health">Health</button>
+                    <button class="vehicle-tab" type="button" data-vehicle-tab="Controls">Controls</button>
+                    <button class="vehicle-tab" type="button" data-vehicle-tab="Driver Assist">Driver Assist</button>
+                    <button class="vehicle-tab" type="button" data-vehicle-tab="Service">Service</button>
+                  </div>
+                  <div class="vehicle-stats">
+                    <div class="vehicle-stat"><span>Range</span><b>418 km</b></div>
+                    <div class="vehicle-stat"><span>Fuel</span><b>78%</b></div>
+                    <div class="vehicle-stat"><span>Tires</span><b>OK</b></div>
+                  </div>
+                  <div class="vehicle-panel-grid" id="vehiclePanel">
+                    <div class="vehicle-info-card"><svg class="icon"><use href="#icon-check"></use></svg><b>Remote controls</b><span>Lock, unlock, start, and locate.</span></div>
+                    <div class="vehicle-info-card"><svg class="icon"><use href="#icon-chart"></use></svg><b>Vehicle health</b><span>No active alerts. Fluids and brakes normal.</span></div>
+                    <div class="vehicle-info-card"><svg class="icon"><use href="#icon-navigation"></use></svg><b>Feature usage</b><span>12 active, 6 occasional, 30 unexplored.</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dash-layer hidden" data-car-layer="Connect">
+                <div class="dash-page">
+                  <div class="sync-hero">
+                    <div>
+                      <h3>Connected to Gerald's phone</h3>
+                      <p>FordPass profile, Coach preferences, and practice flags are synced to SYNC.</p>
+                    </div>
+                    <span class="round-icon green"><svg class="icon"><use href="#icon-wifi"></use></svg></span>
+                  </div>
+                  <div class="connect-card"><span class="round-icon blue"><svg class="icon"><use href="#icon-user"></use></svg></span><span><b>Driver profile</b><span>Gerald Muller | Primary driver</span></span><span class="switch-pill">Live</span></div>
+                  <div class="connect-card"><span class="round-icon purple"><svg class="icon"><use href="#icon-message"></use></svg></span><span><b>Ford Coach</b><span>Standard guidance | Voice + app notifications</span></span><span class="switch-pill">On</span></div>
+                  <div class="connect-card"><span class="round-icon cyan"><svg class="icon"><use href="#icon-navigation"></use></svg></span><span><b>Practice flag</b><span id="connectPractice">Lane Keeping Assist ready next drive</span></span><span class="switch-pill">Synced</span></div>
+                </div>
+              </div>
+
+              <div class="dash-layer hidden" data-car-layer="Apps">
+                <div class="dash-page">
+                  <div class="sync-hero">
+                    <div>
+                      <h3>Apps</h3>
+                      <p>Large, driver-safe tiles for the most relevant SYNC experiences.</p>
+                    </div>
+                  </div>
+                  <div class="tile-grid">
+                    <button class="app-tile active" type="button" data-app="Ford Coach"><span class="round-icon cyan"><svg class="icon"><use href="#icon-message"></use></svg></span><b>Ford Coach</b><span>Suggestions, tutorials, and feedback.</span></button>
+                    <button class="app-tile" type="button" data-app="Navigation" data-car-tab-shortcut="Navigation"><span class="round-icon blue"><svg class="icon"><use href="#icon-navigation"></use></svg></span><b>Navigation</b><span>Route, ETA, and traffic.</span></button>
+                    <button class="app-tile" type="button" data-app="Media"><span class="round-icon amber"><svg class="icon"><use href="#icon-play"></use></svg></span><b>Media</b><span>Phone audio and playback.</span></button>
+                    <button class="app-tile" type="button" data-app="Phone"><span class="round-icon green"><svg class="icon"><use href="#icon-user"></use></svg></span><b>Phone</b><span>Hands-free calls and messages.</span></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dash-layer hidden" data-car-layer="Settings">
+                <div class="dash-page">
+                  <div class="sync-hero">
+                    <div>
+                      <h3>Coach settings</h3>
+                      <p>Controls stay simple and can be changed later in FordPass.</p>
+                    </div>
+                  </div>
+                  <div class="settings-list">
+                    <div class="setting-row"><span class="round-icon purple"><svg class="icon"><use href="#icon-spark"></use></svg></span><span><b>Coaching intensity</b><span>Standard guidance</span></span><span class="switch-pill">Edit</span></div>
+                    <div class="setting-row"><span class="round-icon cyan"><svg class="icon"><use href="#icon-mic"></use></svg></span><span><b>Voice tutorials</b><span>Allowed when workload is low</span></span><span class="switch-pill">On</span></div>
+                    <div class="setting-row"><span class="round-icon green"><svg class="icon"><use href="#icon-check"></use></svg></span><span><b>Privacy</b><span>Trip context + feature usage only</span></span><span class="switch-pill">Agreed</span></div>
+                    <div class="setting-row"><span class="round-icon red"><svg class="icon"><use href="#icon-chevron"></use></svg></span><span><b>Muted features</b><span>No disabled suggestions yet</span></span><span class="switch-pill">0</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="climate">
+                <span>22.0 C</span>
+                <span><svg class="icon small"><use href="#icon-settings"></use></svg>AUTO</span>
+                <span>A/C</span>
+                <span>22.0 C</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="coach">
+      <div class="section-head">
+        <div>
+          <h2>3. Ford Coach Flow Integration</h2>
+          <p>This keeps the flow from your new document, but presents it as a guided journey instead of another dense board. Click any stage to see what changes in the app and in-car experience.</p>
+        </div>
+        <span class="pill" id="coachStatus">Welcome prompt</span>
+      </div>
+
+      <div class="coach-layout">
+        <aside class="journey-list" aria-label="Ford Coach journey stages">
+          <button class="journey-step active" type="button" data-stage="welcome"><span class="num">1</span><span><b>Welcome prompt</b><small>Shown after vehicle activation.</small></span></button>
+          <button class="journey-step" type="button" data-stage="setup"><span class="num">2</span><span><b>Coach setup</b><small>Preferences, channels, privacy.</small></span></button>
+          <button class="journey-step" type="button" data-stage="home"><span class="num">3</span><span><b>Coach home</b><small>Learn basics or practice next drive.</small></span></button>
+          <button class="journey-step" type="button" data-stage="drive"><span class="num">4</span><span><b>First drive</b><small>Passive context monitoring.</small></span></button>
+          <button class="journey-step" type="button" data-stage="suggestion"><span class="num">5</span><span><b>In-car suggestion</b><small>Banner plus voice line.</small></span></button>
+          <button class="journey-step" type="button" data-stage="tutorial"><span class="num">6</span><span><b>Micro-tutorial</b><small>Voice-led and safety gated.</small></span></button>
+          <button class="journey-step" type="button" data-stage="reflection"><span class="num">7</span><span><b>Reflection</b><small>Love it, sometimes, not for me.</small></span></button>
+          <button class="journey-step" type="button" data-stage="progress"><span class="num">8</span><span><b>Ongoing progress</b><small>Regular use and next feature.</small></span></button>
+        </aside>
+
+        <section class="coach-stage">
+          <div class="stage-top">
+            <span class="round-icon cyan" id="stageIcon"><svg class="icon"><use href="#icon-message"></use></svg></span>
+            <div>
+              <h3 id="stageTitle">Welcome to Ford Coach</h3>
+              <p id="stagePrompt">After activation, the app invites the driver to set up Ford Coach for their personal profile.</p>
+            </div>
+          </div>
+          <div class="stage-nav">
+            <div class="stage-count">
+              <span id="stageCounter">Step 1 of 8</span>
+              <div class="stage-progress"><span id="stageProgress"></span></div>
+            </div>
+            <div class="stage-buttons">
+              <button class="ghost-btn" type="button" id="prevStage"><svg class="icon flip"><use href="#icon-chevron"></use></svg>Previous</button>
+              <button class="primary-btn" type="button" id="nextStage">Next<svg class="icon"><use href="#icon-chevron"></use></svg></button>
+            </div>
+          </div>
+          <div class="stage-body">
+            <div class="coach-card">
+              <h4>How it integrates</h4>
+              <p id="stageDetail">Add a dismissible Ford Coach card to the FordPass home profile area. If the driver skips setup, keep a tile in the app menu so the feature can be discovered later.</p>
+              <div class="choice-grid" id="stageChoices">
+                <button class="choice active" type="button" data-choice="Set up now"><svg class="icon small"><use href="#icon-check"></use></svg>Set up now</button>
+                <button class="choice" type="button" data-choice="Maybe later"><svg class="icon small"><use href="#icon-chevron"></use></svg>Maybe later</button>
+              </div>
+            </div>
+            <div class="coach-card">
+              <h4>Profile sync</h4>
+              <div class="progress-list">
+                <div class="progress-row"><b id="profileLabel">Coach profile: not created</b><div class="bar"><span id="profileBar" style="width:18%;"></span></div></div>
+                <div class="progress-row"><b>Coaching intensity</b><p id="intensityLabel">Standard guidance</p></div>
+                <div class="progress-row"><b>Channels</b><p id="channelLabel">Ford app + SYNC voice</p></div>
+                <div class="progress-row"><b>Feature status</b><p id="featureStatusLabel">Lane Keeping: Not tried</p></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="flow-summary">
+        <div class="flow-chip"><b>Activation</b><span>Starts only after FordPass Connect activation succeeds.</span></div>
+        <div class="flow-chip"><b>Personalization</b><span>Driver selects comfort, intensity, and channels.</span></div>
+        <div class="flow-chip"><b>Safety</b><span>In-car guidance pauses when driving workload rises.</span></div>
+        <div class="flow-chip"><b>Learning loop</b><span>Feedback updates app status and future suggestions.</span></div>
+      </div>
+    </section>
+
+    <section class="benefits" aria-label="Benefits">
+      <div class="benefit"><span class="round-icon blue"><svg class="icon"><use href="#icon-check"></use></svg></span><span><b>Unlock features</b>Help drivers use what they already have.</span></div>
+      <div class="benefit"><span class="round-icon green"><svg class="icon"><use href="#icon-car"></use></svg></span><span><b>Drive smarter</b>Coach gently in safe driving contexts.</span></div>
+      <div class="benefit"><span class="round-icon purple"><svg class="icon"><use href="#icon-chart"></use></svg></span><span><b>Improve Ford</b>Turn feedback into better feature design.</span></div>
+      <div class="benefit"><span class="round-icon cyan"><svg class="icon"><use href="#icon-spark"></use></svg></span><span><b>Adapt to you</b>Recommendations evolve with preference.</span></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"><svg class="icon"><use href="#icon-check"></use></svg><span id="toastText">Updated</span></div>
+
+  <script>
+    const featureData = {
+      "Lane Keeping Assist": {
+        score: 72,
+        action: "Practice Lane Keeping next drive",
+        dashTitle: "Lane Keeping",
+        dashCopy: "Try on your next highway drive",
+        voice: "Teach me Lane Keeping",
+        tutorial: "Voice-led guidance starts only when workload is low."
+      },
+      "Active Park Assist": {
+        score: 76,
+        action: "Practice parking assistance next drive",
+        dashTitle: "Park Assist",
+        dashCopy: "Useful in tight city parking",
+        voice: "Teach me Park Assist",
+        tutorial: "SYNC explains space detection and when Gerald stays in control."
+      },
+      "Adaptive Cruise Control": {
+        score: 69,
+        action: "Practice Adaptive Cruise on highway",
+        dashTitle: "Adaptive Cruise",
+        dashCopy: "Best above 60 km/h",
+        voice: "Teach me Adaptive Cruise",
+        tutorial: "SYNC guides speed set and following distance."
+      }
+    };
+
+    const stageData = {
+      welcome: {
+        title: "Welcome to Ford Coach",
+        prompt: "After activation, the app invites the driver to set up Ford Coach for their personal profile.",
+        detail: "Add a dismissible Ford Coach card to the FordPass home profile area. If the driver skips setup, keep a tile in the app menu so the feature can be discovered later.",
+        profile: "Coach profile: not created",
+        bar: "18%",
+        feature: "Lane Keeping: Not tried",
+        status: "Welcome prompt"
+      },
+      setup: {
+        title: "Short Coach setup",
+        prompt: "The app asks about tech confidence, suggestion frequency, notification channels, and privacy consent.",
+        detail: "Use four lightweight screens: attitude to automation, coaching intensity, in-car/app channels, and a clear data confirmation.",
+        profile: "Coach profile: being created",
+        bar: "38%",
+        feature: "Adaptive Cruise: Not tried",
+        status: "Setup questionnaire"
+      },
+      home: {
+        title: "Your Ford Coach home",
+        prompt: "A dedicated Coach home shows feature tiles with status chips and simple actions.",
+        detail: "The mobile recommendation cards become Coach tiles with Learn basics and Practice next drive actions.",
+        profile: "Coach profile: synced to vehicle",
+        bar: "54%",
+        feature: "Parking Assist: Practice scheduled",
+        status: "Coach home"
+      },
+      drive: {
+        title: "Passive first drive",
+        prompt: "SYNC monitors context quietly, such as highway trips where Adaptive Cruise was not used.",
+        detail: "No interruption is needed here. The system waits for a suitable moment and respects the driver’s coaching intensity.",
+        profile: "SYNC context: active",
+        bar: "66%",
+        feature: "Adaptive Cruise: Opportunity detected",
+        status: "Passive monitoring"
+      },
+      suggestion: {
+        title: "In-car suggestion",
+        prompt: "Ford Coach: Adaptive Cruise can help on long highway drives. Say, OK Ford, teach me Adaptive Cruise.",
+        detail: "The infotainment screen shows a small banner with voice-first choices: ignore, dismiss, stop showing, or start tutorial.",
+        profile: "In-car suggestion: shown",
+        bar: "76%",
+        feature: "Adaptive Cruise: Suggested",
+        status: "Suggestion shown"
+      },
+      tutorial: {
+        title: "Voice micro-tutorial",
+        prompt: "I’ll guide you through turning on Adaptive Cruise. You remain in control at all times.",
+        detail: "Tutorial steps stay short and pause automatically when traffic complexity or driver workload increases.",
+        profile: "Tutorial: in progress",
+        bar: "84%",
+        feature: "Adaptive Cruise: Tried in car",
+        status: "Tutorial active"
+      },
+      reflection: {
+        title: "Post-drive reflection",
+        prompt: "You tried Adaptive Cruise on your last trip. How would you like to use it going forward?",
+        detail: "Use a post-drive app card with Love it, Use sometimes, and Not for me. The answer updates future in-car suggestions.",
+        profile: "Preference captured",
+        bar: "93%",
+        feature: "Adaptive Cruise: Occasional",
+        status: "Preference capture"
+      },
+      progress: {
+        title: "Ongoing exploration",
+        prompt: "You regularly use Blind Spot Info and Lane Keeping. Next recommended: Intelligent Speed Assist.",
+        detail: "The Coach home evolves into progress tracking with tutorial replay, practice scheduling, and coaching intensity controls.",
+        profile: "Coach profile: learning",
+        bar: "100%",
+        feature: "Next: Intelligent Speed Assist",
+        status: "Ongoing progress"
+      }
+    };
+
+    const toast = document.querySelector("#toast");
+    const toastText = document.querySelector("#toastText");
+    let toastTimer;
+
+    function showToast(message) {
+      toastText.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    const featureRows = Array.from(document.querySelectorAll(".feature-row, .mini-feature"));
+    const appLayers = Array.from(document.querySelectorAll(".app-layer"));
+    const mobileScore = document.querySelector("#mobileScore");
+    const mobileStatus = document.querySelector("#mobileStatus");
+    const mobileAction = document.querySelector("#mobileAction");
+    const phoneSelectedFeature = document.querySelector("#phoneSelectedFeature");
+    const heroFeature = document.querySelector("#heroFeature");
+    const dashTitle = document.querySelector("#dashTitle");
+    const dashCopy = document.querySelector("#dashCopy");
+    const voiceLine = document.querySelector("#voiceLine");
+    const tutorialCopy = document.querySelector("#tutorialCopy");
+    const carStatus = document.querySelector("#carStatus");
+    const carLayers = Array.from(document.querySelectorAll(".dash-layer"));
+    const railButtons = Array.from(document.querySelectorAll(".rail button"));
+    const connectPractice = document.querySelector("#connectPractice");
+    const vehiclePanelData = {
+      Overview: [
+        ["check", "Remote controls", "Lock, unlock, start, and locate."],
+        ["chart", "Vehicle health", "No active alerts. Fluids and brakes normal."],
+        ["navigation", "Feature usage", "12 active, 6 occasional, 30 unexplored."]
+      ],
+      Health: [
+        ["check", "Tire pressure", "All tires within recommended range."],
+        ["chart", "Oil life", "82% remaining."],
+        ["settings", "Fluids and brakes", "Wiper fluid, brake condition, and filters OK."]
+      ],
+      Controls: [
+        ["car", "Lock status", "Vehicle locked."],
+        ["spark", "Remote start", "Ready when vehicle is parked."],
+        ["navigation", "Locate vehicle", "Last seen near home location."]
+      ],
+      "Driver Assist": [
+        ["navigation", "Lane Keeping", "Recommended for Gerald's highway drives."],
+        ["cruise", "Adaptive Cruise", "Not tried yet. Suitable in steady traffic."],
+        ["map-pin", "Park Assist", "Useful in city parking."]
+      ],
+      Service: [
+        ["chart", "Odometer", "12,840 km."],
+        ["check", "Health alerts", "No active alerts."],
+        ["settings", "SYNC updates", "Software up to date."]
+      ]
+    };
+    const iconMap = {
+      check: "icon-check",
+      chart: "icon-chart",
+      navigation: "icon-navigation",
+      settings: "icon-settings",
+      car: "icon-car",
+      spark: "icon-spark",
+      cruise: "icon-cruise",
+      "map-pin": "icon-map-pin"
+    };
+
+    function setCarLayer(tab, announce = true) {
+      railButtons.forEach((item) => item.classList.toggle("active", item.dataset.carTab === tab));
+      carLayers.forEach((layer) => layer.classList.toggle("hidden", layer.dataset.carLayer !== tab));
+      carStatus.textContent = `SYNC ${tab} selected`;
+      document.querySelector("#dashContext").textContent = tab === "Home" ? "Coach ready | 22 C" : `${tab} | Gerald Muller`;
+      if (announce) showToast(`SYNC ${tab}`);
+    }
+
+    function setFeature(name, announce = true) {
+      const data = featureData[name];
+      featureRows.forEach((row) => row.classList.toggle("active", row.dataset.feature === name));
+      mobileScore.innerHTML = `${data.score}<small>/100</small>`;
+      mobileStatus.textContent = `${data.score} utilization score`;
+      mobileAction.textContent = data.action;
+      if (phoneSelectedFeature) phoneSelectedFeature.textContent = name.replace(" Assist", "");
+      heroFeature.textContent = `${name} selected for Gerald`;
+      if (connectPractice) connectPractice.textContent = `${name} ready next drive`;
+      carStatus.textContent = `${name} ready in SYNC`;
+      if (announce) showToast(`${name} selected`);
+    }
+
+    featureRows.forEach((row) => {
+      row.addEventListener("click", () => setFeature(row.dataset.feature));
+    });
+
+    document.querySelectorAll(".phone-nav button").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".phone-nav button").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        appLayers.forEach((layer) => layer.classList.toggle("hidden", layer.dataset.layer !== button.dataset.phoneTab));
+        const label = button.dataset.phoneTab === "Profile" ? "Gerald Muller profile" : `${button.dataset.phoneTab} layer`;
+        mobileStatus.textContent = label;
+        showToast(label);
+      });
+    });
+
+    railButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        setCarLayer(button.dataset.carTab);
+      });
+    });
+
+    document.querySelectorAll("[data-car-tab-shortcut]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setCarLayer(button.dataset.carTabShortcut);
+      });
+    });
+
+    document.querySelectorAll(".app-tile").forEach((tile) => {
+      tile.addEventListener("click", () => {
+        document.querySelectorAll(".app-tile").forEach((item) => item.classList.remove("active"));
+        tile.classList.add("active");
+        carStatus.textContent = `${tile.dataset.app} opened`;
+        showToast(tile.dataset.app);
+      });
+    });
+
+    document.querySelectorAll("[data-home-action]").forEach((tile) => {
+      tile.addEventListener("click", () => {
+        document.querySelectorAll("[data-home-action]").forEach((item) => item.classList.remove("active"));
+        tile.classList.add("active");
+        showToast("Coach suggestion selected");
+      });
+    });
+
+    document.querySelectorAll(".setting-row").forEach((row) => {
+      row.addEventListener("click", () => {
+        showToast(row.querySelector("b")?.textContent || "Setting selected");
+      });
+    });
+
+    document.querySelectorAll(".vehicle-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".vehicle-tab").forEach((item) => item.classList.remove("active"));
+        tab.classList.add("active");
+        const rows = vehiclePanelData[tab.dataset.vehicleTab] || vehiclePanelData.Overview;
+        document.querySelector("#vehiclePanel").innerHTML = rows.map(([icon, title, text]) => `
+          <div class="vehicle-info-card"><svg class="icon"><use href="#${iconMap[icon]}"></use></svg><b>${title}</b><span>${text}</span></div>
+        `).join("");
+        showToast(`Vehicle ${tab.dataset.vehicleTab}`);
+      });
+    });
+
+    document.querySelector("#practiceButton").addEventListener("click", () => {
+      carStatus.textContent = "Practice flag synced to SYNC";
+      showToast("Practice scheduled");
+    });
+
+    document.querySelector("#learnButton").addEventListener("click", () => {
+      showToast("Basics opened");
+    });
+
+    document.querySelector("#startTutorial").addEventListener("click", () => {
+      carStatus.textContent = "Voice tutorial active";
+      document.querySelector("#dashContext").textContent = "Voice tutorial | workload low";
+      showToast("Voice tutorial started");
+    });
+
+    const dismissFeatureButton = document.querySelector("#dismissFeature");
+    if (dismissFeatureButton) {
+      dismissFeatureButton.addEventListener("click", () => {
+        carStatus.textContent = "Suggestion dismissed for this drive";
+        showToast("Dismissed for this drive");
+      });
+    }
+
+    const journeySteps = Array.from(document.querySelectorAll(".journey-step"));
+    const coachStatus = document.querySelector("#coachStatus");
+    const stageTitle = document.querySelector("#stageTitle");
+    const stagePrompt = document.querySelector("#stagePrompt");
+    const stageDetail = document.querySelector("#stageDetail");
+    const profileLabel = document.querySelector("#profileLabel");
+    const profileBar = document.querySelector("#profileBar");
+    const featureStatusLabel = document.querySelector("#featureStatusLabel");
+    const intensityLabel = document.querySelector("#intensityLabel");
+    const channelLabel = document.querySelector("#channelLabel");
+    const stageCounter = document.querySelector("#stageCounter");
+    const stageProgress = document.querySelector("#stageProgress");
+    const prevStageButton = document.querySelector("#prevStage");
+    const nextStageButton = document.querySelector("#nextStage");
+    const stageOrder = Object.keys(stageData);
+
+    function setStage(stage, announce = true) {
+      const data = stageData[stage];
+      const index = stageOrder.indexOf(stage);
+      journeySteps.forEach((step) => {
+        const stepIndex = stageOrder.indexOf(step.dataset.stage);
+        step.classList.toggle("active", step.dataset.stage === stage);
+        step.classList.toggle("complete", stepIndex > -1 && stepIndex < index);
+      });
+      coachStatus.textContent = data.status;
+      stageTitle.textContent = data.title;
+      stagePrompt.textContent = data.prompt;
+      stageDetail.textContent = data.detail;
+      profileLabel.textContent = data.profile;
+      profileBar.style.width = data.bar;
+      featureStatusLabel.textContent = data.feature;
+      intensityLabel.textContent = stage === "setup" ? "Standard guidance selected" : "Standard guidance";
+      channelLabel.textContent = stage === "reflection" ? "Post-drive app card" : "Ford app + SYNC voice";
+      stageCounter.textContent = `Step ${index + 1} of ${stageOrder.length}`;
+      stageProgress.style.width = `${((index + 1) / stageOrder.length) * 100}%`;
+      prevStageButton.disabled = index === 0;
+      nextStageButton.disabled = index === stageOrder.length - 1;
+      nextStageButton.innerHTML = index === stageOrder.length - 1 ? 'Complete<svg class="icon"><use href="#icon-check"></use></svg>' : 'Next<svg class="icon"><use href="#icon-chevron"></use></svg>';
+      if (announce) showToast(data.status);
+    }
+
+    journeySteps.forEach((step) => {
+      step.addEventListener("click", () => setStage(step.dataset.stage));
+    });
+
+    document.querySelectorAll(".choice").forEach((choice) => {
+      choice.addEventListener("click", () => {
+        document.querySelectorAll(".choice").forEach((item) => item.classList.remove("active"));
+        choice.classList.add("active");
+        showToast(choice.dataset.choice);
+      });
+    });
+
+    prevStageButton.addEventListener("click", () => {
+      const active = document.querySelector(".journey-step.active")?.dataset.stage || "welcome";
+      const previous = stageOrder[Math.max(stageOrder.indexOf(active) - 1, 0)];
+      setStage(previous);
+    });
+
+    nextStageButton.addEventListener("click", () => {
+      const active = document.querySelector(".journey-step.active")?.dataset.stage || "welcome";
+      const next = stageOrder[Math.min(stageOrder.indexOf(active) + 1, stageOrder.length - 1)];
+      setStage(next);
+    });
+
+    setFeature("Lane Keeping Assist", false);
+    setStage("welcome", false);
+  </script>
+</body>
+</html>
